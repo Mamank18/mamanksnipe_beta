@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dexscreener Token Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e2a38;
+      color: #6086b1;
+      padding: 20px;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input, button, select {
+      padding: 6px;
+      font-size: 12px;
+      border-radius: 5px;
+      border: none;
+      box-sizing: border-box;
+    }
+
+    input, .select2-container--default .select2-selection--single {
+      width: 180px !important;
+      background-color: #2b3846;
+      color: #6086b1;
+    }
+
+    .select2-container {
+      width: 180px !important;
+    }
+
+    button {
+      background-color: #2b3846;
+      color: #6086b1;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .result-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #1e2b38;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px rgba(0,255,255,0.1);
+      flex: 1 1 400px;
+      max-width: 400px;
+    }
+
+    .card a {
+      color: #74b9ff;
+      text-decoration: none;
+    }
+
+    .card a:hover {
+      text-decoration: underline;
+    }
+
+    .label {
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .value {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    #chartContainer {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      flex: 1 1 600px;
+    }
+
+    #chartContainer iframe {
+      width: 100%;
+      height: 250px;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-container">
+    <h2>Dexscreener Token Dashboard</h2>
+    <div class="form-group">
+      <select id="chainId">
+        <option value="solana" data-image="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png">Solana</option>
+        <option value="ethereum" data-image="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png">Ethereum</option>
+        <option value="bsc" data-image="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png">BNB Chain</option>
+        <option value="tron" data-image="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png">TRON</option>
+      </select>
+
+      <input type="text" id="tokenAddresses" placeholder="Token Address (pisahkan dengan koma)">
+      <button id="fetchBtn">Snipe</button>
+    </div>
+  </div>
+
+  <div class="result-container">
+    <div id="result"></div>
+    <div id="chartContainer"></div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script>
+    function formatState(state) {
+      if (!state.id) return state.text;
+      const imageUrl = $(state.element).data('image');
+      return $(
+        `<span style="display: flex; align-items: center;"><img src="${imageUrl}" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"/>${state.text}</span>`
+      );
+    }
+
+    const gmgnChains = {
+      solana: 'sol',
+      ethereum: 'eth',
+      bsc: 'bsc',
+      tron: 'tron'
+    };
+
+    $(document).ready(function () {
+      $('#chainId').select2({
+        templateResult: formatState,
+        templateSelection: formatState,
+        minimumResultsForSearch: -1
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const fetchBtn = document.getElementById("fetchBtn");
+      fetchBtn.addEventListener("click", fetchTokenData);
+
+      function shortenAddress(addr) {
+        return addr?.length > 10 ? addr.slice(0, 4) + "..." + addr.slice(-4) : addr;
+      }
+
+      function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+      }
+
+      async function fetchTokenData() {
+        const chainId = document.getElementById("chainId").value.trim();
+        const rawInput = document.getElementById("tokenAddresses").value.trim();
+        const tokenAddresses = rawInput.split(",").map(addr => addr.trim()).join(",");
+        const resultDiv = document.getElementById("result");
+
+        if (!chainId || !tokenAddresses) {
+          alert("Mohon isi chainId dan token address!");
+          return;
+        }
+
+        const url = `https://api.dexscreener.com/tokens/v1/${chainId}/${tokenAddresses}`;
+        resultDiv.innerHTML = "Loading...";
+
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          resultDiv.innerHTML = "";
+
+          if (!Array.isArray(data) || data.length === 0) {
+            resultDiv.innerHTML = "Data tidak ditemukan.";
+            return;
+          }
+
+          data.forEach(pair => {
+            const imageUrl = pair.info?.imageUrl || "https://via.placeholder.com/40x40?text=NO+IMG";
+
+            const html = `
+              <div class="card">
+                <img src="${imageUrl}" alt="${pair.baseToken.symbol}" style="height: 40px; border-radius: 8px; margin-bottom: 10px;">
+                <div class="value"><strong>${pair.baseToken.name}</strong> (${pair.baseToken.symbol})</div>
+                <div class="label">Pair</div>
+                <div class="value">${pair.baseToken.symbol} / ${pair.quoteToken.symbol}</div>
+                <div class="label">Price</div>
+                <div class="value">USD: $${parseFloat(pair.priceUsd).toFixed(6)} | Native: ${pair.priceNative}</div>
+                <div class="label">Price chg(24h)</div>
+                <div class="value">${pair.priceChange?.h24 ?? 0}%</div>
+                <div class="label">Volume chg(24h)</div>
+                <div class="value">Buy: ${pair.txns?.h24?.buys} | Sell: ${pair.txns?.h24?.sells} | Total: $${parseFloat(pair.volume?.h24).toLocaleString()}</div>
+                <div class="label">Liquidity</div>
+                <div class="value">USD: $${parseFloat(pair.liquidity?.usd || 0).toLocaleString()}</div>
+                <div class="label">FDV / MarketCap</div>
+                <div class="value">FDV: $${parseFloat(pair.fdv || 0).toLocaleString()} | MC: $${parseFloat(pair.marketCap || 0).toLocaleString()}</div>
+                <div class="label">DEX</div>
+                <div class="value">${pair.dexId}</div>
+                <div class="label">Pair Created</div>
+                <div class="value">${formatDate(pair.pairCreatedAt)}</div>
+                <div class="label">Address</div>
+                <div class="value" title="${pair.pairAddress}">${shortenAddress(pair.pairAddress)}</div>
+                ${pair.info?.websites?.[0]?.url ? `<div class="label"></div><div class="value"><a href="${pair.info.websites[0].url}" target="_blank">${pair.info.websites[0].url}</a></div>` : ''}
+                ${pair.info?.socials?.map(social => `<div class="label">${social.platform}</div><div class="value"><a href="${social.url}" target="_blank">${social.url}</a></div>`).join('') || ''}
+                <a href="${pair.url}" target="_blank">Lihat di Dexscreener →</a>
+              </div>
+            `;
+
+            resultDiv.innerHTML += html;
+            loadCharts(pair.baseToken.address, chainId, 'dark');
+          });
+
+        } catch (err) {
+          resultDiv.innerHTML = "Terjadi kesalahan saat mengambil data.";
+          console.error(err);
+        }
+      }
+    });
+
+    function loadCharts(ca, chain, theme) {
+      const timeframes = ['1', '5', '15', '60'];
+      const gmgnChain = gmgnChains[chain] || chain;
+      const container = document.getElementById('chartContainer');
+      container.innerHTML = '';
+
+      timeframes.forEach(tf => {
+        const url = `https://www.gmgn.cc/kline/${gmgnChain}/${ca}?interval=${tf}&theme=${theme}`;
+        const div = document.createElement('div');
+        div.innerHTML = `<iframe src="${url}" title="Chart ${tf}min"></iframe>`;
+        container.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
