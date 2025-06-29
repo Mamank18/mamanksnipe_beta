@@ -60,8 +60,10 @@ function copyToClipboard(text) {
 function renderCard(pair) {
   const priceChange = parseFloat(pair.priceChange?.h24 ?? 0);
   const changeClass = priceChange > 0 ? "positive" : priceChange < 0 ? "negative" : "";
-  const solscanUrl = `https://solscan.io/token/${pair.baseToken.address}`;
+  const solscanUrl = `https://solscan.io/token/${pair.baseToken.address}#holders`;
+  const gmgnUrl = `https://gmgn.ai/${gmgnChains[latestChainId]}/token/${pair.baseToken.address}`;
   const solscanIcon = `https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png`;
+  const gmgnIcon = "https://raw.githubusercontent.com/Mamank18/mamanksnipe_beta/main/assets/gmgn.png";
   const shortCA = `${pair.baseToken.address.slice(0, 6)}...${pair.baseToken.address.slice(-4)}`;
 
   return `
@@ -85,6 +87,9 @@ function renderCard(pair) {
             <img src="${solscanIcon}" alt="Solscan" style="width: 16px; height: 16px; vertical-align: middle;" />
           </a> |
           ${pair.baseToken.symbol}/${pair.quoteToken.symbol} | ${pair.dexId}
+          <a href="${gmgnUrl}" target="_blank" style="margin-left: 8px;">
+            <img src="${gmgnIcon}" alt="GMGN" style="width: 16px; height: 16px; vertical-align: middle;" />
+          </a>
         </span>
       </div>
       <div class="value ${changeClass}">
