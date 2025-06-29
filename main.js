@@ -89,15 +89,22 @@ async function fetchTokenData() {
 
       const chartBox = document.createElement("div");
       chartBox.className = "charts-per-token";
-      const chartId = `chart-${pair.baseToken.address}`;
-      chartBox.id = chartId;
+
+      const timeframes = ['1', '5', '15'];
+      timeframes.forEach(tf => {
+        const url = `https://www.gmgn.cc/kline/${gmgnChains[latestChainId]}/${pair.baseToken.address}?interval=${tf}&theme=dark`;
+        const iframe = document.createElement("iframe");
+        iframe.src = url;
+        iframe.style.width = "100%";
+        iframe.style.height = "300px";
+        iframe.style.border = "none";
+        chartBox.appendChild(iframe);
+      });
 
       tokenBox.appendChild(card);
       tokenBox.appendChild(chartBox);
       wrapper.appendChild(tokenBox);
       resultDiv.appendChild(wrapper);
-
-      loadCharts(pair.baseToken.address, latestChainId, 'dark', chartId);
     });
   } catch (err) {
     resultDiv.innerHTML = "Terjadi kesalahan saat mengambil data.";
@@ -116,18 +123,4 @@ async function refreshSingleToken(address) {
   } catch (err) {
     console.error("Gagal refresh data:", err);
   }
-}
-
-function loadCharts(ca, chain, theme, containerId) {
-  const timeframes = ['1', '5', '15', '60'];
-  const gmgnChain = gmgnChains[chain] || chain;
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-
-  timeframes.forEach(tf => {
-    const url = `https://www.gmgn.cc/kline/${gmgnChain}/${ca}?interval=${tf}&theme=${theme}`;
-    const div = document.createElement('div');
-    div.innerHTML = `<iframe src="${url}"></iframe>`;
-    container.appendChild(div);
-  });
 }
