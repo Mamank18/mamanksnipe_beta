@@ -195,3 +195,44 @@ button {
   box-shadow: 0 0 6px rgba(0, 255, 213, 0.4);
   cursor: pointer;
 }
+@media (max-width: 600px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .form-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  input, button, select, .select2-container {
+    width: 100% !important;
+    font-size: 14px;
+  }
+
+  .clear-btn {
+    right: 12px;
+    top: 35%;
+  }
+
+  .dashboard-title {
+    font-size: 20px;
+  }
+
+  .card {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .charts-per-token {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-per-token iframe:nth-child(1),
+  .charts-per-token iframe:nth-child(2),
+  .charts-per-token iframe:nth-child(3) {
+    grid-column: 1;
+  }
+}
