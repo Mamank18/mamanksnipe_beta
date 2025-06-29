@@ -231,8 +231,15 @@
       const changeClass = priceChange > 0 ? "positive" : priceChange < 0 ? "negative" : "";
       const imageUrl = pair.info?.imageUrl || "https://via.placeholder.com/48";
 
-      return `
-        <img class="token-image" src="${imageUrl}" alt="icon">
+      
+    return `
+        <img class="token-image" src="${pair.info?.imageUrl || 'https://via.placeholder.com/48'}" alt="icon"
+          onerror="this.onerror=null;
+                   if (this.src.includes('placeholder.com')) {
+                     this.src='https://raw.githubusercontent.com/Mamank18/mamanksnipe_beta/main/favicon.png';
+                   } else {
+                     this.src='https://via.placeholder.com/48';
+                   }">
         <div>
           <div class="value">
             <span><strong>${pair.baseToken.name}</strong> (${pair.baseToken.symbol}) | ${pair.baseToken.address} | ${pair.baseToken.symbol}/${pair.quoteToken.symbol} | ${pair.dexId}</span>
@@ -246,7 +253,8 @@
             USD: $${parseFloat(pair.priceUsd).toFixed(6)} |
           </div>
         </div>
-      `;
+    `;
+    
     }
 
     async function fetchTokenData() {
@@ -324,3 +332,4 @@
   </script>
 </body>
 </html>
+
