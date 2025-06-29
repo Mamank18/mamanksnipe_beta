@@ -162,14 +162,14 @@ button {
 
 .charts-per-token {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 6px;
   width: 100%;
 }
 
 .charts-per-token iframe {
   width: 100%;
-  height: 295px;
+  height: 300px;
   border: none;
   border-radius: 6px;
 }
