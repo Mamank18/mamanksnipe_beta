@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dexscreener Token Dashboard</title>
+  <title>Mamank Snipe Dashboard.vBeta</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style>
     body {
@@ -17,7 +18,24 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+    }
+
+    .dashboard-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #e20a0a;
+      text-shadow: 0 0 4px rgba(0, 255, 213, 0.6), 0 0 10px rgba(0, 255, 213, 0.3);
+      letter-spacing: 1px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .dashboard-logo {
+      height: 40px;
+      width: 40px;
+      filter: drop-shadow(0 0 3px #00ffd5);
     }
 
     .form-group {
@@ -25,6 +43,7 @@
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
+      position: relative;
     }
 
     input, button, select {
@@ -39,6 +58,18 @@
       width: 140px !important;
       background-color: #2b3846;
       color: #6086b1;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 65px;
+      background: transparent;
+      border: none;
+      color: #6086b1;
+      cursor: pointer;
+      font-size: 16px;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .select2-container {
@@ -60,59 +91,90 @@
 
     .pair-container {
       display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .token-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .card {
-      background-color: #1e2b38;
+      background: linear-gradient(145deg, #2e3c4d, #1c2633);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(0,255,255,0.1);
-      width: 400px;
-      flex-shrink: 0;
-    }
-
-    .card a {
-      color: #74b9ff;
-      text-decoration: none;
-    }
-
-    .card a:hover {
-      text-decoration: underline;
-    }
-
-    .label {
-      color: #aaa;
       font-size: 13px;
-      margin-top: 5px;
+      color: #e0e0e0;
+      width: 100%;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
     }
 
-    .value {
-      font-size: 16px;
-      margin-bottom: 5px;
+    .card:hover {
+      transform: scale(1.01);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .card .value {
+      margin-bottom: 2px;
+      line-height: 1.4;
+      font-size: 13px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .positive {
+      color: #00ff88;
+    }
+
+    .negative {
+      color: #ff5e5e;
     }
 
     .charts-per-token {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      flex: 1;
+      gap: 6px;
+      width: 100%;
     }
 
     .charts-per-token iframe {
       width: 100%;
-      height: 250px;
+      height: 300px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
+    }
+
+    .token-image {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
 
   <div class="header-container">
-    <h2>Dexscreener Token Dashboard</h2>
-    <div class="form-group">
+    <h2 class="dashboard-title">
+      <img class="dashboard-logo" src="https://raw.githubusercontent.com/Mamank18/mamanksnipe_beta/main/favicon.png" alt="logo">
+      Mamank Snipe Dashboard.vBeta
+    </h2>
+  
+
+  <div class="form-group">
       <select id="chainId">
         <option value="solana" data-image="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png">Solana</option>
         <option value="ethereum" data-image="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png">Ethereum</option>
@@ -121,6 +183,7 @@
       </select>
 
       <input type="text" id="tokenAddresses" placeholder="Token Address (pisahkan dengan koma)">
+      <button class="clear-btn" onclick="document.getElementById('tokenAddresses').value = ''">×</button>
       <button id="fetchBtn">Snipe</button>
     </div>
   </div>
@@ -130,14 +193,6 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
-    function formatState(state) {
-      if (!state.id) return state.text;
-      const imageUrl = $(state.element).data('image');
-      return $(`
-        <span style="display: flex; align-items: center;"><img src="${imageUrl}" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"/>${state.text}</span>
-      `);
-    }
-
     const gmgnChains = {
       solana: 'sol',
       ethereum: 'eth',
@@ -145,96 +200,113 @@
       tron: 'tron'
     };
 
+    let latestChainId = "";
+    let latestTokenAddresses = "";
+    let latestPairData = {};
+
+    function formatState(state) {
+      if (!state.id) return state.text;
+      const imageUrl = $(state.element).data('image');
+      return $(`<span style="display: flex; align-items: center;"><img src="${imageUrl}" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"/>${state.text}</span>`);
+    }
+
     $(document).ready(function () {
       $('#chainId').select2({
         templateResult: formatState,
         templateSelection: formatState,
         minimumResultsForSearch: -1
       });
-    });
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const fetchBtn = document.getElementById("fetchBtn");
-      fetchBtn.addEventListener("click", fetchTokenData);
-
-      function shortenAddress(addr) {
-        return addr?.length > 10 ? addr.slice(0, 4) + "..." + addr.slice(-4) : addr;
-      }
-
-      function formatDate(timestamp) {
-        const date = new Date(timestamp);
-        return date.toLocaleString();
-      }
-
-      async function fetchTokenData() {
-        const chainId = document.getElementById("chainId").value.trim();
-        const rawInput = document.getElementById("tokenAddresses").value.trim();
-        const tokenAddresses = rawInput.split(",").map(addr => addr.trim()).join(",");
-        const resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = "Loading...";
-
-        try {
-          const res = await fetch(`https://api.dexscreener.com/tokens/v1/${chainId}/${tokenAddresses}`);
-          const data = await res.json();
-          resultDiv.innerHTML = "";
-
-          if (!Array.isArray(data) || data.length === 0) {
-            resultDiv.innerHTML = "Data tidak ditemukan.";
-            return;
-          }
-
-          data.forEach(pair => {
-            const imageUrl = pair.info?.imageUrl || "https://via.placeholder.com/40x40?text=NO+IMG";
-
-            const wrapper = document.createElement("div");
-            wrapper.className = "pair-container";
-
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-              <img src="${imageUrl}" alt="${pair.baseToken.symbol}" style="height: 40px; border-radius: 8px; margin-bottom: 10px;">
-              <div class="value"><strong>${pair.baseToken.name}</strong> (${pair.baseToken.symbol})</div>
-              <div class="label">Pair</div>
-              <div class="value">${pair.baseToken.symbol} / ${pair.quoteToken.symbol}</div>
-              <div class="label">Price</div>
-              <div class="value">USD: $${parseFloat(pair.priceUsd).toFixed(6)} | Native: ${pair.priceNative}</div>
-              <div class="label">Price chg(24h)</div>
-              <div class="value">${pair.priceChange?.h24 ?? 0}%</div>
-              <div class="label">Volume chg(24h)</div>
-              <div class="value">Buy: ${pair.txns?.h24?.buys} | Sell: ${pair.txns?.h24?.sells} | Total: $${parseFloat(pair.volume?.h24).toLocaleString()}</div>
-              <div class="label">Liquidity</div>
-              <div class="value">USD: $${parseFloat(pair.liquidity?.usd || 0).toLocaleString()}</div>
-              <div class="label">FDV / MarketCap</div>
-              <div class="value">FDV: $${parseFloat(pair.fdv || 0).toLocaleString()} | MC: $${parseFloat(pair.marketCap || 0).toLocaleString()}</div>
-              <div class="label">DEX</div>
-              <div class="value">${pair.dexId}</div>
-              <div class="label">Pair Created</div>
-              <div class="value">${formatDate(pair.pairCreatedAt)}</div>
-              <div class="label">Address</div>
-              <div class="value" title="${pair.pairAddress}">${shortenAddress(pair.pairAddress)}</div>
-              ${pair.info?.websites?.[0]?.url ? `<div class="label"></div><div class="value"><a href="${pair.info.websites[0].url}" target="_blank">${pair.info.websites[0].url}</a></div>` : ''}
-              ${pair.info?.socials?.map(social => `<div class="label">${social.platform}</div><div class="value"><a href="${social.url}" target="_blank">${social.url}</a></div>`).join('') || ''}
-              <a href="${pair.url}" target="_blank">Lihat di Dexscreener →</a>
-            `;
-
-            const chartBox = document.createElement("div");
-            chartBox.className = "charts-per-token";
-            const chartId = `chart-${pair.baseToken.address}`;
-            chartBox.id = chartId;
-
-            wrapper.appendChild(card);
-            wrapper.appendChild(chartBox);
-            resultDiv.appendChild(wrapper);
-
-            loadCharts(pair.baseToken.address, chainId, 'dark', chartId);
-          });
-
-        } catch (err) {
-          resultDiv.innerHTML = "Terjadi kesalahan saat mengambil data.";
-          console.error(err);
+      document.getElementById("fetchBtn").addEventListener("click", fetchTokenData);
+      document.getElementById("tokenAddresses").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("fetchBtn").click();
         }
-      }
+      });
     });
+
+    function renderCard(pair) {
+      const priceChange = parseFloat(pair.priceChange?.h24 ?? 0);
+      const changeClass = priceChange > 0 ? "positive" : priceChange < 0 ? "negative" : "";
+      const imageUrl = pair.info?.imageUrl || "https://via.placeholder.com/48";
+
+      return `
+        <img class="token-image" src="${imageUrl}" alt="icon">
+        <div>
+          <div class="value">
+            <span><strong>${pair.baseToken.name}</strong> (${pair.baseToken.symbol}) | ${pair.baseToken.address} | ${pair.baseToken.symbol}/${pair.quoteToken.symbol} | ${pair.dexId}</span>
+          </div>
+          <div class="value ${changeClass}">
+            MC: $${parseFloat(pair.marketCap || 0).toLocaleString()} |
+            24h Change: ${priceChange}% | 
+            Volume: $${parseFloat(pair.volume?.h24 || 0).toLocaleString()} | 
+            Liquidity: $${parseFloat(pair.liquidity?.usd || 0).toLocaleString()} | 
+            FDV: $${parseFloat(pair.fdv || 0).toLocaleString()} |  
+            USD: $${parseFloat(pair.priceUsd).toFixed(6)} |
+          </div>
+        </div>
+      `;
+    }
+
+    async function fetchTokenData() {
+      latestChainId = document.getElementById("chainId").value.trim();
+      const rawInput = document.getElementById("tokenAddresses").value.trim();
+      latestTokenAddresses = rawInput.split(",").map(addr => addr.trim()).join(",");
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "Loading...";
+
+      try {
+        const res = await fetch(`https://api.dexscreener.com/tokens/v1/${latestChainId}/${latestTokenAddresses}`);
+        const data = await res.json();
+        resultDiv.innerHTML = "";
+
+        data.forEach(pair => {
+          latestPairData[pair.baseToken.address] = pair;
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "pair-container";
+          wrapper.id = `wrapper-${pair.baseToken.address}`;
+
+          const tokenBox = document.createElement("div");
+          tokenBox.className = "token-box";
+
+          const card = document.createElement("div");
+          card.className = "card";
+          card.id = `card-${pair.baseToken.address}`;
+          card.innerHTML = renderCard(pair);
+          card.addEventListener("click", () => refreshSingleToken(pair.baseToken.address));
+
+          const chartBox = document.createElement("div");
+          chartBox.className = "charts-per-token";
+          const chartId = `chart-${pair.baseToken.address}`;
+          chartBox.id = chartId;
+
+          tokenBox.appendChild(card);
+          tokenBox.appendChild(chartBox);
+          wrapper.appendChild(tokenBox);
+          resultDiv.appendChild(wrapper);
+
+          loadCharts(pair.baseToken.address, latestChainId, 'dark', chartId);
+        });
+      } catch (err) {
+        resultDiv.innerHTML = "Terjadi kesalahan saat mengambil data.";
+        console.error(err);
+      }
+    }
+
+    async function refreshSingleToken(address) {
+      try {
+        const res = await fetch(`https://api.dexscreener.com/tokens/v1/${latestChainId}/${address}`);
+        const data = await res.json();
+        const pair = data[0];
+        latestPairData[pair.baseToken.address] = pair;
+        const cardEl = document.getElementById(`card-${pair.baseToken.address}`);
+        if (cardEl) cardEl.innerHTML = renderCard(pair);
+      } catch (err) {
+        console.error("Gagal refresh data:", err);
+      }
+    }
 
     function loadCharts(ca, chain, theme, containerId) {
       const timeframes = ['1', '5', '15', '60'];
