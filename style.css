@@ -127,7 +127,6 @@ button {
   font-size: 13px;
   color: #e0e0e0;
   width: 100%;
-  cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: row;
@@ -135,11 +134,6 @@ button {
   align-items: center;
   text-align: center;
   gap: 12px;
-}
-
-.card:hover {
-  transform: scale(1.01);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 .card .value {
@@ -169,11 +163,13 @@ button {
 }
 
 .charts-per-token iframe:nth-child(1) {
-  grid-column: 1 / span 2; /* Chart 1 lebar penuh */
+  grid-column: 1 / span 2;
 }
+
 .charts-per-token iframe:nth-child(2) {
   grid-column: 1;
 }
+
 .charts-per-token iframe:nth-child(3) {
   grid-column: 2;
 }
@@ -183,4 +179,19 @@ button {
   height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.image-wrapper:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 6px rgba(0, 255, 213, 0.4);
+  cursor: pointer;
 }

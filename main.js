@@ -31,29 +31,68 @@ $(document).ready(function () {
   });
 });
 
+function showCopiedPopup() {
+  const popup = document.createElement("div");
+  popup.innerText = "Copied";
+  popup.style.position = "fixed";
+  popup.style.bottom = "20px";
+  popup.style.left = "50%";
+  popup.style.transform = "translateX(-50%)";
+  popup.style.backgroundColor = "#2b3846";
+  popup.style.color = "#00ffcc";
+  popup.style.padding = "6px 12px";
+  popup.style.borderRadius = "6px";
+  popup.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+  popup.style.fontSize = "14px";
+  popup.style.zIndex = 9999;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1500);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showCopiedPopup();
+  }, () => {
+    alert("Gagal menyalin alamat token.");
+  });
+}
+
 function renderCard(pair) {
   const priceChange = parseFloat(pair.priceChange?.h24 ?? 0);
   const changeClass = priceChange > 0 ? "positive" : priceChange < 0 ? "negative" : "";
+  const solscanUrl = `https://solscan.io/token/${pair.baseToken.address}`;
+  const solscanIcon = `https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png`;
+  const shortCA = `${pair.baseToken.address.slice(0, 6)}...${pair.baseToken.address.slice(-4)}`;
 
   return `
-    <img class="token-image" src="${pair.info?.imageUrl || 'https://via.placeholder.com/48'}" alt="icon"
-      onerror="this.onerror=null;
-               if (this.src.includes('placeholder.com')) {
-                 this.src='https://raw.githubusercontent.com/Mamank18/mamanksnipe_beta/main/assets/favicon.png';
-               } else {
-                 this.src='https://via.placeholder.com/48';
-               }">
+    <div class="image-wrapper">
+      <img class="token-image" src="${pair.info?.imageUrl || 'https://via.placeholder.com/48'}" alt="icon"
+        onclick="refreshSingleToken('${pair.baseToken.address}')"
+        onerror="this.onerror=null;
+                 if (this.src.includes('placeholder.com')) {
+                   this.src='https://raw.githubusercontent.com/Mamank18/mamanksnipe_beta/main/assets/favicon.png';
+                 } else {
+                   this.src='https://via.placeholder.com/48';
+                 }">
+    </div>
     <div>
       <div class="value">
-        <span><strong>${pair.baseToken.name}</strong> (${pair.baseToken.symbol}) | ${pair.baseToken.address} | ${pair.baseToken.symbol}/${pair.quoteToken.symbol} | ${pair.dexId}</span>
+        <span><strong>${pair.baseToken.name}</strong> (${pair.baseToken.symbol}) | 
+          <span style="text-decoration: underline; cursor: pointer;" onclick="copyToClipboard('${pair.baseToken.address}')">
+            ${shortCA}
+          </span>
+          <a href="${solscanUrl}" target="_blank" style="margin-left: 8px;">
+            <img src="${solscanIcon}" alt="Solscan" style="width: 16px; height: 16px; vertical-align: middle;" />
+          </a> |
+          ${pair.baseToken.symbol}/${pair.quoteToken.symbol} | ${pair.dexId}
+        </span>
       </div>
       <div class="value ${changeClass}">
         MC: $${parseFloat(pair.marketCap || 0).toLocaleString()} |
         24h Change: ${priceChange}% | 
-        Volume: $${parseFloat(pair.volume?.h24 || 0).toLocaleString()} | 
-        Liquidity: $${parseFloat(pair.liquidity?.usd || 0).toLocaleString()} | 
-        FDV: $${parseFloat(pair.fdv || 0).toLocaleString()} |  
-        USD: $${parseFloat(pair.priceUsd).toFixed(6)} |
+        V24h: $${parseFloat(pair.volume?.h24 || 0).toLocaleString()} | 
+        Liq: $${parseFloat(pair.liquidity?.usd || 0).toLocaleString()} |   
+        USD: $${parseFloat(pair.priceUsd).toFixed(6)}
       </div>
     </div>
   `;
@@ -85,7 +124,6 @@ async function fetchTokenData() {
       card.className = "card";
       card.id = `card-${pair.baseToken.address}`;
       card.innerHTML = renderCard(pair);
-      card.addEventListener("click", () => refreshSingleToken(pair.baseToken.address));
 
       const chartBox = document.createElement("div");
       chartBox.className = "charts-per-token";
