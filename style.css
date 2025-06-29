@@ -46,10 +46,35 @@ input, button, select {
   box-sizing: border-box;
 }
 
-input, .select2-container--default .select2-selection--single {
-  width: 140px !important;
+input {
+  width: 140px;
   background-color: #2b3846;
   color: #6086b1;
+}
+
+.select2-container--default .select2-selection--single {
+  background-color: #2b3846;
+  color: #6086b1;
+  border: none !important;
+  border-radius: 5px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  outline: none;
+  box-shadow: none;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: #6086b1;
+  line-height: 32px;
+  padding-left: 10px;
+  background-color: #2b3846;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 32px;
+  right: 10px;
 }
 
 .clear-btn {
