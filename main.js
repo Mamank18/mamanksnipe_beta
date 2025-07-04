@@ -167,3 +167,19 @@ async function refreshSingleToken(address) {
     console.error("Gagal refresh data:", err);
   }
 }
+
+// Tombol Back to Top
+const backToTopBtn = document.createElement("button");
+   backToTopBtn.id = "backToTopBtn";
+   backToTopBtn.title = "Kembali ke atas";
+   backToTopBtn.innerText = "↑";
+document.body.appendChild(backToTopBtn);
+
+window.onscroll = function () {
+  backToTopBtn.style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? "block" : "none";
+};
+
+  backToTopBtn.onclick = function () {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
